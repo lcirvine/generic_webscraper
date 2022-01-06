@@ -88,13 +88,16 @@ def main():
                     }
                     for null_value in [k for k, v in ws_data.items() if v == '']:
                         ws_data.pop(null_value)
-                    for k, v in ws_data.items():
-                        logger.info(f"{k} = {v}")
                     ws.parse_table(url, values['include_links'], **ws_data)
                     df = ws.return_df()
                     if df is not None and len(df) > 0:
                         window['ws_status'].update(f"{len(df)} rows found in table")
                         window['Save'].update(disabled=False)
+                    else:
+                        window['ws_status'].update(f"Unable to find data, see logs")
+                        logger.info(f"Values entered:")
+                        for k, v in ws_data.items():
+                            logger.info(f"{k} = {v}")
                 except Exception as e:
                     logger.error(e, exc_info=sys.exc_info())
                     window['ws_status'].update(f"Error - see logs")

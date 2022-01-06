@@ -61,17 +61,24 @@ class WebScraper:
             table = soup.find_all(table_elem)[table_num]
         else:
             table = soup.find(table_elem)
-        assert table is not None, f'Unable to find table with these attributes {table_attrs}'
-        for row in table.find_all(row_elem):
-            cells = [c.text.strip() for c in row.find_all(cell_elem)]
-            if include_links:
-                for link in row.find_all('a'):
-                    cells.append(link['href'])
-            if len(cells) > 1:
-                table_data.append(cells)
-        cols = [c.text.strip() for c in table.find_all(header_elem)]
-        cols = cols[:len(table_data[0])]
-        self.df = pd.concat([self.df, pd.DataFrame(table_data, columns=cols)])
+        if table is not None:
+            for row in table.find_all(row_elem):
+                cells = [c.text.strip() for c in row.find_all(cell_elem)]
+                if include_links:
+                    for link in row.find_all('a'):
+                        cells.append(link['href'])
+                if len(cells) > 1:
+                    table_data.append(cells)
+            cols = [c.text.strip() for c in table.find_all(header_elem)]
+            df_new = pd.DataFrame(table_data)
+            if len(cols) == len(df_new.columns):
+                df_new.columns = cols
+            self.df = pd.concat([self.df, df_new])
+        else:
+            logger.info(f"Unable to find {table_elem} with attributes {table_attrs} or number {table_num}")
+            tables = soup.find_all(table_elem)
+            for i, tbl in enumerate(tables):
+                logger.info(f"{i} - {tbl.attrs}")
 
     def return_df(self) -> pd.DataFrame:
         return self.df
