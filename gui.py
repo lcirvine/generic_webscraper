@@ -46,7 +46,7 @@ def main():
 
     layout = [[
         [sg.Frame('Browser', [
-            [sg.InputCombo(values=['Firefox', 'Chrome'], default_value='Firefox', key='browser'),
+            [sg.InputCombo(values=[None, 'Firefox', 'Chrome'], default_value=None, key='browser'),
              sg.Checkbox(text='Headless?', key='headless', default=True),
              sg.Button('Create Browser', focus=True, button_color=('white', 'blue'), key='create_browser')]
         ], border_width=3)],
@@ -70,7 +70,8 @@ def main():
                 ws.close()
             break
         if event == 'create_browser':
-            ws = WebScraper(browser=values['browser'], headless=values['headless'])
+            browser_selected = values['browser']
+            ws = WebScraper(browser=browser_selected, headless=values['headless'])
             window['scrape'].update(disabled=False)
             window['ws_status'].update('Provide website data, then click Scrape Website')
         if event == 'scrape':
@@ -83,7 +84,7 @@ def main():
                     ws_data = {
                         'table_elem': values['table_elem'],
                         'table_attrs': {values['table_attrs_key']: values['table_attrs_val']},
-                        'table_num': int(values['table_num']),
+                        'table_num': values['table_num'],
                         'row_elem': values['row_elem'],
                         'cell_elem': [x.strip() for x in values['cell_elem'].split(',')],
                         'header_elem': values['header_elem']
