@@ -83,13 +83,13 @@ def main():
                     logger.info(f"URL - {url}")
                     ws_data = {
                         'table_elem': values['table_elem'],
-                        'table_attrs': {values['table_attrs_key']: values['table_attrs_val']},
+                        'table_attrs': {values['table_attrs_key']: [x.strip() for x in values['table_attrs_val'].split(',')]},
                         'table_num': values['table_num'],
                         'row_elem': values['row_elem'],
                         'cell_elem': [x.strip() for x in values['cell_elem'].split(',')],
                         'header_elem': values['header_elem']
                     }
-                    for null_value in [k for k, v in ws_data.items() if v == '' or v == {'': ''}]:
+                    for null_value in [k for k, v in ws_data.items() if v == '' or v == {'': ['']}]:
                         ws_data.pop(null_value)
                     ws.parse_table(url, values['include_links'], **ws_data)
                     df = ws.return_df()

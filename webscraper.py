@@ -6,6 +6,7 @@ from selenium import webdriver
 # from webdriver_manager.chrome import ChromeDriverManager
 # from webdriver_manager.firefox import GeckoDriverManager
 from bs4 import BeautifulSoup
+from time import sleep
 from logging_webscraper import logger
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -38,17 +39,20 @@ class WebScraper:
             driver = None
         return driver
 
-    def load_url(self, url: str):
+    def load_url(self, url: str, sleep_sec: int = 3):
         logger.info(f'Loading {url}')
         if self.driver:
             # doing this so that I don't navigate back to the original page for semi-automated scraping
             if url not in self.driver.current_url:
                 self.driver.get(url)
+                # sleep(sleep_sec)
         else:
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36', }
             res = requests.get(url, headers=headers, verify=False)
             if res.ok:
                 self.page_text = res.text
+            sleep(sleep_sec)
+            res.close()
 
     def return_soup(self) -> BeautifulSoup:
         """
