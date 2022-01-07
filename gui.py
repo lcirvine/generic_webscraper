@@ -12,7 +12,6 @@ def main():
     window_theme = random.choice(fave_themes)
 
     sg.theme(window_theme)
-    print(window_theme)
 
     col_web_1 = [
         [sg.Text('URL')],
@@ -24,23 +23,25 @@ def main():
         [sg.Text('Header Element')],
         [sg.Text('Links')]
     ]
+    std_size = (35, 1)
     col_web_2 = [
-        [sg.InputText(key='url')],
-        [sg.InputText('table', key='table_elem')],
-        [sg.InputText(key='table_num')],
-        [sg.InputText(key='table_attrs')],
-        [sg.InputText('tr', key='row_elem')],
-        [sg.InputText('td', key='cell_elem')],
-        [sg.InputText('th', key='header_elem')],
-        [sg.Checkbox(text='', key='include_links')]
+        [sg.InputText(key='url', size=std_size)],
+        [sg.InputText('table', key='table_elem', size=std_size)],
+        [sg.InputText(key='table_num', size=std_size)],
+        [sg.InputText(key='table_attrs_key', size=(16, 1)), sg.InputText(key='table_attrs_val', size=(17, 1))],
+        [sg.InputText('tr', key='row_elem', size=std_size)],
+        [sg.InputText('td', key='cell_elem', size=std_size)],
+        [sg.InputText('th', key='header_elem', size=std_size)],
+        [sg.Checkbox(text='', key='include_links', size=std_size)]
     ]
     col_save_1 = [
         [sg.Text('Folder')],
         [sg.Text('File Name')]
     ]
+
     col_save_2 = [
-        [sg.InputText(key='folder'), sg.FolderBrowse()],
-        [sg.InputText(key='file'), sg.InputCombo(values=['.csv', '.xlsx'], default_value='.csv', key='file_type')]
+        [sg.InputText(key='folder', size=(40, 1)), sg.FolderBrowse()],
+        [sg.InputText(key='file', size=(39, 1)), sg.InputCombo(values=['.csv', '.xlsx'], default_value='.csv', key='file_type')]
     ]
 
     layout = [[
@@ -53,10 +54,11 @@ def main():
             [sg.Column(col_web_1, element_justification='l'),
             sg.Column(col_web_2, element_justification='l')]
         ], border_width=3)],
-    [sg.Button('Scrape Website', disabled=True, button_color=('white', 'blue'), key='scrape')],
+    [sg.Button('Scrape Website', disabled=True, button_color=('white', 'blue'), key='scrape'),
+     sg.Button('Clear Data', disabled=True, button_color=('black', 'yellow'), key='clear')],
     [sg.Column(col_save_1, element_justification='r'), sg.Column(col_save_2, element_justification='l')],
-    [sg.Button('Exit', button_color=('white', 'red')), sg.Button('Save', disabled=True, button_color=('white', 'green'))],
-    [sg.Text('Info:'), sg.Text('Click Create Browser to begin', size=(50, 1), key='ws_status')]
+    [sg.Button('Exit', button_color=('white', 'red')), sg.Button('Save', bind_return_key=True, disabled=True, button_color=('white', 'green'))],
+    [sg.Multiline('Click Create Browser to begin', size=(60, 5), key='ws_status')]
     ]]
 
     window = sg.Window('Generic Webscraper', layout)
@@ -80,29 +82,35 @@ def main():
                     logger.info(f"URL - {url}")
                     ws_data = {
                         'table_elem': values['table_elem'],
-                        'table_attrs': values['table_attrs'],
-                        'table_num': values['table_num'],
+                        'table_attrs': {values['table_attrs_key']: values['table_attrs_val']},
+                        'table_num': int(values['table_num']),
                         'row_elem': values['row_elem'],
-                        'cell_elem': values['cell_elem'],
+                        'cell_elem': [x.strip() for x in values['cell_elem'].split(',')],
                         'header_elem': values['header_elem']
                     }
-                    for null_value in [k for k, v in ws_data.items() if v == '']:
+                    for null_value in [k for k, v in ws_data.items() if v == '' or v == {'': ''}]:
                         ws_data.pop(null_value)
                     ws.parse_table(url, values['include_links'], **ws_data)
                     df = ws.return_df()
                     if df is not None and len(df) > 0:
-                        window['ws_status'].update(f"{len(df)} rows found in table")
+                        window['ws_status'].update(f"{len(df)} rows found in table\n\n{df.head(5).to_string(na_rep='')}")
                         window['Save'].update(disabled=False)
+                        window['clear'].update(disabled=False)
                     else:
-                        window['ws_status'].update(f"Unable to find data, see logs")
-                        logger.info(f"Values entered:")
-                        for k, v in ws_data.items():
-                            logger.info(f"{k} = {v}")
+                        status_text = f"Unable to find data using inputs provided\n" \
+                                      f"\n{ws.return_element_attrs(values['table_elem'])}"
+                        window['ws_status'].update(status_text)
+                        logger.info(status_text)
                 except Exception as e:
                     logger.error(e, exc_info=sys.exc_info())
-                    window['ws_status'].update(f"Error - see logs")
+                    window['ws_status'].update(f"Error\n{e}")
                     if ws is not None:
                         ws.close()
+        if event == 'clear':
+            ws.clear_dataframe()
+            window['ws_status'].update('Provide website data, then click Scrape Website')
+            window['clear'].update(disabled=True)
+            window['Save'].update(disabled=True)
         if event == 'Save':
             folder = values['folder']
             file = values['file']
