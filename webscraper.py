@@ -37,6 +37,17 @@ class WebScraper:
         """
         return BeautifulSoup(self.driver.page_source, 'html.parser')
 
+    def return_element_attrs(self, elem: str):
+        soup = self.return_soup()
+        all_elems = soup.find_all(elem)
+        attr_text = f"{len(all_elems)} instances of {elem} found on page\n"
+        for i, el in enumerate(all_elems):
+            attr_text += f"{i} - {el.attrs}\n"
+        return attr_text
+
+    def clear_dataframe(self):
+        self.df = pd.DataFrame()
+
     def parse_table(self, url: str, include_links: bool,  **kwargs):
         """
         Parses the table identified by the table attributes into a pandas dataframe
@@ -47,10 +58,6 @@ class WebScraper:
         table_elem = kwargs.get('table_elem', 'table')
         table_attrs = kwargs.get('table_attrs')
         table_num = kwargs.get('table_num')
-        if table_num is not None and table_num.isnumeric():
-            table_num = int(table_num)
-        else:
-            table_num = None
         row_elem = kwargs.get('row_elem', 'tr')
         cell_elem = kwargs.get('cell_elem', 'td')
         header_elem = kwargs.get('header_elem', 'th')
@@ -58,7 +65,7 @@ class WebScraper:
         if table_attrs is not None:
             table = soup.find(table_elem, attrs=table_attrs)
         elif table_num is not None:
-            table = soup.find_all(table_elem)[table_num]
+            table = soup.find_all(table_elem)[int(table_num)]
         else:
             table = soup.find(table_elem)
         if table is not None:
@@ -74,6 +81,7 @@ class WebScraper:
             if len(cols) == len(df_new.columns):
                 df_new.columns = cols
             self.df = pd.concat([self.df, df_new])
+            self.df.drop_duplicates(inplace=True)
         else:
             logger.info(f"Unable to find {table_elem} with attributes {table_attrs} or number {table_num}")
             tables = soup.find_all(table_elem)
