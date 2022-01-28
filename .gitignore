@@ -1,3 +1,13 @@
 /Logs/
 /.idea/
+/.ipynb_checkpoints/
+/build/
+/dist/
 *.log
+*.spec
+*.csv
+*.xlsx
+*.bat
+*.ini
+*.toml
+*.yaml

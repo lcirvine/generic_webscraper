@@ -7,10 +7,34 @@ from logging_webscraper import logger
 
 
 def main():
-    with open('themes.txt', 'r') as f:
-        fave_themes = list(set(f.read().split('\n')))
-    window_theme = random.choice(fave_themes)
 
+    fave_themes = [
+        'LightBlue4',
+        'DarkGrey10',
+        'DarkTeal5',
+        'TealMono',
+        'SystemDefault',
+        'DarkGrey6',
+        'LightGrey1',
+        'DarkBlue13',
+        'DarkBlue3',
+        'BluePurple',
+        'LightGreen2',
+        'SystemDefaultForReal',
+        'DarkTeal2',
+        'DarkGrey7',
+        'DarkTeal10',
+        'DarkBlue9',
+        'DarkGrey8',
+        'DarkBlue2',
+        'DarkTeal12',
+        'DarkBlue12',
+        'DarkGrey12',
+        'LightGreen',
+        'DarkTeal9'
+    ]
+
+    window_theme = random.choice(fave_themes)
     sg.theme(window_theme)
 
     col_web_1 = [
@@ -52,13 +76,13 @@ def main():
         ], border_width=3)],
         [sg.Frame('Website', [
             [sg.Column(col_web_1, element_justification='l'),
-            sg.Column(col_web_2, element_justification='l')]
+             sg.Column(col_web_2, element_justification='l')]
         ], border_width=3)],
-    [sg.Button('Scrape Website', disabled=True, button_color=('white', 'blue'), key='scrape'),
-     sg.Button('Clear Data', disabled=True, button_color=('black', 'yellow'), key='clear')],
-    [sg.Column(col_save_1, element_justification='r'), sg.Column(col_save_2, element_justification='l')],
-    [sg.Button('Exit', button_color=('white', 'red')), sg.Button('Save', bind_return_key=True, disabled=True, button_color=('white', 'green'))],
-    [sg.Multiline('Click Create Browser to begin', size=(60, 5), key='ws_status')]
+        [sg.Button('Scrape Website', disabled=True, button_color=('white', 'blue'), key='scrape'),
+         sg.Button('Clear Data', disabled=True, button_color=('black', 'yellow'), key='clear')],
+        [sg.Column(col_save_1, element_justification='r'), sg.Column(col_save_2, element_justification='l')],
+        [sg.Button('Exit', button_color=('white', 'red')), sg.Button('Save', bind_return_key=True, disabled=True, button_color=('white', 'green'))],
+        [sg.Multiline('Click Create Browser to begin', size=(60, 5), key='ws_status')]
     ]]
 
     window = sg.Window('Generic Webscraper', layout)
