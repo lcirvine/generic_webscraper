@@ -1,6 +1,6 @@
 /Logs/
 /.idea/
-/.ipynb_checkpoints/
+/notebooks/.ipynb_checkpoints/
 /build/
 /dist/
 *.log
@@ -11,3 +11,4 @@
 *.ini
 *.toml
 *.yaml
+*.env
